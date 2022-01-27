@@ -1,6 +1,7 @@
 package exercise2;
 
 import java.util.Random;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Blackjack{
@@ -15,21 +16,9 @@ public class Blackjack{
     private int computerSum;
     
     private int numPlayerCard;
-    private int playerMax;
     
     private String winner;
     private boolean end;
-    
-    //Private : setup
-	private int[] setCard(int max) {
-    	int[] cards = new int[max];
-    	
-    	for (int i = 0; i<max; i++) {
-    		cards[i] = 0;
-    	}
-    	
-    	return cards;
-    }
 	
 	//Private : draw
 	private int drawCard() {
@@ -37,37 +26,28 @@ public class Blackjack{
 		return r.nextInt(11)+1;
 	}
 	
-	private void prepare() {
-		//Setup data
+    //Constructor
+    public Blackjack(){
+    	//Setup : data
 		playerSum = 0;
         computerSum = 0;
-        playerMax = 5;
         end = false;
         
-        //Setup computer
-        computerCard = setCard(2);
-        computerCard[0] = drawCard();
-        computerCard[1] = drawCard();
-        if (computerCard[0] == 11 && computerCard[1] == 11) {
+        //Setup : computer
+        computerCard = new int[] {drawCard(), drawCard()};
+        computerSum = getComputerSum();
+        if (computerSum == 11+11) {
         	computerCard[1] = 1;
         }
         computerSum = getComputerSum();
         
-        //Setup player
-        playerCard = setCard(playerMax);
-        playerCard[0] = drawCard();
-        playerCard[1] = drawCard();
-        if (playerCard[0] == 11 && playerCard[1] == 11) {
+        //Setup : player
+        playerCard = new int[] {drawCard(), drawCard(), 0, 0, 0};
+        if (getPlayerSum() == 11+11) {
         	playerCard[1] = 1;
         }
         playerSum = getPlayerSum();
         numPlayerCard = 2;
-	}
-    
-    //Constructor
-    public Blackjack(){
-        //Initialize game data
-        prepare();
     }
     
     //Method : player
@@ -124,17 +104,28 @@ public class Blackjack{
     
     //Method : winner
     public String getWinner(){
+    	//Player : Bust
     	if (getPlayerSum() > 21) {
     		winner = "Computer!!";
     	}
+    	//Player : win
     	else if(getPlayerSum() > getComputerSum()){
-            winner = "Player!!";
-        }
-    	else if (getPlayerSum() == getComputerSum()) {
-    		winner = "Draw!!";
+    		
+    		if (getPlayerSum() == 21) {
+    			winner = "Player Blackjack!!";
+    		}
+    		else {
+    			winner = "Player!!";
+    		}
     	}
+    	//Player : Lose
         else {
-            winner = "Computer!!";
+        	if (getComputerSum() == 21) {
+        		winner = "Computer Blackjack!!";
+        	}
+        	else {
+        		winner = "Computer!!";
+        	}
         }
     	
         return winner;
@@ -142,8 +133,18 @@ public class Blackjack{
     
     //Method : player
     public void addMoreCard() {
+    	
+    	//Check if can draw
     	if (numPlayerCard < 5) {
-    		playerCard[numPlayerCard] = drawCard();
+    		
+    		//If draw A card
+    		int draw = drawCard();
+    		if (draw == 11 && getPlayerSum()+draw > 21) {
+    			draw = 1;
+    		}
+    		
+    		//Add card
+    		playerCard[numPlayerCard] = draw;
     		numPlayerCard += 1;
     	}
     }
@@ -165,9 +166,6 @@ public class Blackjack{
     
     //Process : start
     public void start(){
-    	//prepare before start
-    	prepare();
-    	
         //Loop
     	do {
 	        //Show card
@@ -199,6 +197,7 @@ public class Blackjack{
     
     //Process : end
     public void getGameResult() {
+    	//Output
     	showPlayerCard();
     	showComputerCard();
     	System.out.println();
@@ -208,18 +207,22 @@ public class Blackjack{
     
     //Main : Check here
     public static void main(String[] args) {
-    	//Prepare object and check
-    	Blackjack bj = new Blackjack();
-    	String check;
+    	String loop = "y";
     	
     	//Loop
     	do {
-    		bj.start();
-    		System.out.print("\nNext more game? <y/n> : ");
-    		check = input.nextLine();
     		
-    	} while (check.equals("y"));
+    		//Start game
+    		Blackjack bj = new Blackjack();
+    		bj.start();
+    		
+    		//Check for next more game
+    		System.out.print("\nNext more game? <y/n> : ");
+    		loop = input.nextLine();
+    		
+    	} while (loop.equals("y"));
     	
+    	//End program
     	System.out.println("Good Bye!!");
     }
 }
